@@ -12,5 +12,10 @@ https://github.com/fullstorydev/grpcurl
 
 grpcurl command
 ```
-grpcurl -plaintext -d "{\"name\":\"Kelvin\"}" -proto greet.proto localhost:5150 greet.Greeter/SayHello
+grpcurl -plaintext -proto points.proto localhost:5150 leaderboard.v1.Points/Stream
 ```
+
+
+# TODOs
+- [ ] Service Discovery available in this app - so it is not needed anymore to provide the proto file format
+- [ ] Create a Background worker to ingest data to change leaderboards

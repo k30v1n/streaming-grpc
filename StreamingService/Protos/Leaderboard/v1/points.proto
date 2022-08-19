@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "StreamingService";
+
+package leaderboard.v1;
+
+service Points{
+  rpc Stream (PointsRequest) returns (stream LeaderboardReply);
+}
+
+message PointsRequest { }
+
+message PersonPoints {
+	string person = 1;
+	int32 points = 2;
+	int32 position = 3;
+}
+
+message LeaderboardReply {
+  repeated PersonPoints data = 1;
+}
