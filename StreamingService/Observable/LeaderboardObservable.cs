@@ -26,7 +26,10 @@ public class LeaderboardObservable: ObservableBase<IReadOnlyCollection<PersonPoi
         return Disposable.Create(() =>
         {
             _logger.LogDebug($"Observer {guid} is unsubscribing");
-            _observers.TryRemove(guid, out _);
+            
+            bool removed = _observers.TryRemove(guid, out _); // exponential retry possibility
+            
+            _logger.LogDebug("Observer {guid} removed from observable", guid);
         });
     }
 }

@@ -17,39 +17,31 @@ public class LeaderboardService : PointsBase
 
     public override async Task Stream(PointsRequest request, IServerStreamWriter<LeaderboardReply> responseStream, ServerCallContext context)
     {
-        IDisposable? observerSubscription = null;
-        try
-        {
-            var cancellationToken = context.CancellationToken;
+        var cancellationToken = context.CancellationToken;
 
-            observerSubscription = _leaderboardObservable.Subscribe(leaderboards =>
+        using var observerSubscription = _leaderboardObservable.Subscribe(leaderboards =>
+        {
+            _logger.LogDebug("Executing on next...");
+
+            var result = new LeaderboardReply();
+
+            result.Data.AddRange(leaderboards);
+
+            responseStream.WriteAsync(result);
+
+        });
+
+        
+        var waitUserCancellation = await Task.Factory.StartNew(async () =>
+        {
+            while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogDebug("Executing on next...");
-                
-                var result = new LeaderboardReply();
-                result.Data.AddRange(leaderboards);
+                await Task.Delay(100);
+            }
+            _logger.LogDebug("Cancellation requested from the client...");
+        });
 
-                responseStream.WriteAsync(result);
-
-            });
-
-            await Task.Factory.StartNew(async () =>
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    await Task.Delay(100);
-                }
-                _logger.LogDebug("Cancellation requested from the client...");
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, ex.Message);
-            throw;
-        }
-        finally
-        {
-            observerSubscription?.Dispose();
-        }
+        await waitUserCancellation;
+        _logger.LogDebug("Stream is ending.");
     }
 }
