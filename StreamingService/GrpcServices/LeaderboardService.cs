@@ -17,28 +17,39 @@ public class LeaderboardService : PointsBase
 
     public override async Task Stream(PointsRequest request, IServerStreamWriter<LeaderboardReply> responseStream, ServerCallContext context)
     {
+        IDisposable? observerSubscription = null;
         try
         {
-            var result = new LeaderboardReply();
+            var cancellationToken = context.CancellationToken;
 
-            for (int i = 0; i < 10; i++)
+            observerSubscription = _leaderboardObservable.Subscribe(leaderboards =>
             {
-                result.Data.Add(new PersonPoints
+                _logger.LogDebug("Executing on next...");
+                
+                var result = new LeaderboardReply();
+                result.Data.AddRange(leaderboards);
+
+                responseStream.WriteAsync(result);
+
+            });
+
+            await Task.Factory.StartNew(async () =>
+            {
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    Position = 1,
-                    Person = $"XYZ_{i}",
-                    Points = 100000
-                });
-
-                await responseStream.WriteAsync(result);
-
-                await Task.Delay(1000);
-            }
+                    await Task.Delay(100);
+                }
+                _logger.LogDebug("Cancellation requested from the client...");
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
             throw;
+        }
+        finally
+        {
+            observerSubscription?.Dispose();
         }
     }
 }
