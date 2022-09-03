@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Reactive;
 using System.Reactive.Disposables;
 
-namespace StreamingService.Observable;
+namespace StreamingService.Observables;
 
 public class LeaderboardObservable: ObservableBase<IReadOnlyCollection<PersonPoints>>
 {
@@ -32,6 +32,11 @@ public class LeaderboardObservable: ObservableBase<IReadOnlyCollection<PersonPoi
             _logger.LogDebug("Observer {guid} removed from observable", guid);
         });
     }
+
+    //public void PublishNew(IReadOnlyCollection<PersonPoints> personPoints)
+    //{
+
+    //}
 }
 
 

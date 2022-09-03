@@ -4,11 +4,13 @@ option csharp_namespace = "StreamingService";
 
 package leaderboard.v1;
 
-service Points{
-  rpc Stream (PointsRequest) returns (stream LeaderboardReply);
+service LeaderboardService {
+  rpc Stream (LeaderboardRequest) returns (stream LeaderboardReply);
 }
 
-message PointsRequest { }
+message LeaderboardRequest {
+	int32 leaderboard = 1;
+}
 
 message PersonPoints {
 	string person = 1;

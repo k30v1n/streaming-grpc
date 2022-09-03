@@ -1,5 +1,5 @@
 
-using StreamingService.Observable;
+using StreamingService.Observables;
 using StreamingService.Services;
 using StreamingService.Workers;
 
@@ -18,7 +18,7 @@ var app = builder.Build();
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 // Configure the HTTP request pipeline.
-app.MapGrpcService<LeaderboardService>();
+app.MapGrpcService<LeaderboardGrpcService>();
 app.MapGet("/", () => "Welcome to the Streaming Service");
 
 logger.LogInformation("Starting application.");

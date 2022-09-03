@@ -1,26 +1,32 @@
 using Grpc.Core;
-using StreamingService.Observable;
-using static StreamingService.Points;
+using StreamingService.Observables;
 
 namespace StreamingService.Services;
 
-public class LeaderboardService : PointsBase
+public class LeaderboardGrpcService : LeaderboardService.LeaderboardServiceBase
 {
-    private readonly ILogger<LeaderboardService> _logger;
+    private readonly ILogger<LeaderboardGrpcService> _logger;
     private readonly LeaderboardObservable _leaderboardObservable;
 
-    public LeaderboardService(ILogger<LeaderboardService> logger, LeaderboardObservable leaderboardObservable)
+    public LeaderboardGrpcService(ILogger<LeaderboardGrpcService> logger, LeaderboardObservable leaderboardObservable)
     {
         _logger = logger;
         _leaderboardObservable = leaderboardObservable;
     }
 
-    public override async Task Stream(PointsRequest request, IServerStreamWriter<LeaderboardReply> responseStream, ServerCallContext context)
+    public override async Task Stream(LeaderboardRequest request, IServerStreamWriter<LeaderboardReply> responseStream, ServerCallContext context)
     {
-        var cancellationToken = context.CancellationToken;
+        // Eu sou o observer
+        // Eu quero observar o Leaderboard de ID 1
 
-        using var observerSubscription = _leaderboardObservable.Subscribe(leaderboards =>
+        var cancellationToken = context.CancellationToken;
+        
+
+        using var observerSubscription = _leaderboardObservable
+            .Subscribe(leaderboards =>
         {
+            // verificar se esse eh o leaderboard do meu interesse?
+
             _logger.LogDebug("Executing on next...");
 
             var result = new LeaderboardReply();

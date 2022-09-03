@@ -12,7 +12,7 @@ https://github.com/fullstorydev/grpcurl
 
 grpcurl command
 ```
-grpcurl -plaintext -proto points.proto localhost:5150 leaderboard.v1.Points/Stream
+grpcurl -plaintext -d '{\"leaderboard\":1}' -proto leaderboard.proto localhost:5150 leaderboard.v1.LeaderboardService/Stream
 ```
 
 

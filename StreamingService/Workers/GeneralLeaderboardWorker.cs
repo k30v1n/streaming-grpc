@@ -1,4 +1,4 @@
-﻿using StreamingService.Observable;
+﻿using StreamingService.Observables;
 
 namespace StreamingService.Workers
 {
@@ -17,16 +17,11 @@ namespace StreamingService.Workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //while (!stoppingToken.IsCancellationRequested)
-            //{
-            //    _logger.LogInformation("Running {name}", nameof(GeneralLeaderboardWorker));
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(5000);
+            }
 
-            //}
-
-            //_leaderboardObservable.sub
-
-
-            await Task.Delay(5000);
             _logger.LogWarning("Background job is shutting down...");
         }
     }
