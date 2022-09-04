@@ -1,25 +1,28 @@
 using Grpc.Core;
-using StreamingService.Observables;
+using StreamingService.Dto;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace StreamingService.Services;
 
 public class LeaderboardGrpcService : LeaderboardService.LeaderboardServiceBase
 {
     private readonly ILogger<LeaderboardGrpcService> _logger;
-    private readonly LeaderboardObservable _leaderboardObservable;
+    private readonly ISubject<LeaderboardDto> _leaderboardSubject;
 
-    public LeaderboardGrpcService(ILogger<LeaderboardGrpcService> logger, LeaderboardObservable leaderboardObservable)
+    public LeaderboardGrpcService(
+        ILogger<LeaderboardGrpcService> logger,
+        ISubject<LeaderboardDto> leaderboardSubject)
     {
         _logger = logger;
-        _leaderboardObservable = leaderboardObservable;
+        _leaderboardSubject = leaderboardSubject;
     }
 
     public override async Task Stream(LeaderboardRequest request, IServerStreamWriter<LeaderboardReply> responseStream, ServerCallContext context)
     {
         var cancellationToken = context.CancellationToken;
 
-        using var observerSubscription = _leaderboardObservable
+        using var observerSubscription = _leaderboardSubject
             .Where(leaderboard => leaderboard.LeaderBoardId == request.Leaderboard)
             .Subscribe(leaderboards =>
             {

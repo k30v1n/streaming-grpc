@@ -1,19 +1,19 @@
 ﻿using StreamingService.Dto;
-using StreamingService.Observables;
+using System.Reactive.Subjects;
 
 namespace StreamingService.Workers
 {
     public class GeneralLeaderboardWorker : BackgroundService
     {
         private readonly ILogger<GeneralLeaderboardWorker> _logger;
-        private readonly LeaderboardObservable _leaderboardObservable;
+        private readonly ISubject<LeaderboardDto> _leaderboardSubject;
 
         public GeneralLeaderboardWorker(
             ILogger<GeneralLeaderboardWorker> logger,
-            LeaderboardObservable leaderboardObservable)
+            ISubject<LeaderboardDto> leaderboardSubject)
         {
             _logger = logger;
-            _leaderboardObservable = leaderboardObservable;
+            _leaderboardSubject = leaderboardSubject;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,12 +28,13 @@ namespace StreamingService.Workers
 
                 _logger.LogDebug($"Publishing for leaderboard `{next.LeaderBoardId}`");
 
-                _leaderboardObservable.PublishNext(next);
+                _leaderboardSubject.OnNext(next);
 
                 await Task.Delay(5000);
             }
 
             _logger.LogWarning("Background job is shutting down...");
+            _leaderboardSubject.OnCompleted();
         }
     }
 }

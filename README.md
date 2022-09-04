@@ -31,5 +31,5 @@ grpcurl -plaintext -d '{\"leaderboard\":1}' -proto leaderboard.proto localhost:5
 
 # TODOs
 - [x] Create a Background worker to ingest data to change leaderboards
-- [ ] Create Reactivex shared object and expose methods to Publishe / Subscribe for observable objects
+- [x] Create Reactivex shared object and expose methods to Publishe / Subscribe for observable objects
 - [ ] Service Discovery available in this app - so it is not needed anymore to provide the proto file format
