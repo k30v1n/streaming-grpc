@@ -1,5 +1,6 @@
 using Grpc.Core;
 using StreamingService.Observables;
+using System.Reactive.Linq;
 
 namespace StreamingService.Services;
 
@@ -16,26 +17,23 @@ public class LeaderboardGrpcService : LeaderboardService.LeaderboardServiceBase
 
     public override async Task Stream(LeaderboardRequest request, IServerStreamWriter<LeaderboardReply> responseStream, ServerCallContext context)
     {
-        // Eu sou o observer
-        // Eu quero observar o Leaderboard de ID 1
-
         var cancellationToken = context.CancellationToken;
-        
 
         using var observerSubscription = _leaderboardObservable
+            .Where(leaderboard => leaderboard.LeaderBoardId == request.Leaderboard)
             .Subscribe(leaderboards =>
-        {
-            // verificar se esse eh o leaderboard do meu interesse?
+            {
+                _logger.LogDebug("Executing on next...");
 
-            _logger.LogDebug("Executing on next...");
+                LeaderboardReply result = new ();
+                result.Data.AddRange(leaderboards.Data.Select(x => new PersonPoints {
+                    Person = x.Person,
+                    Points = x.Points,
+                    Position = x.Position 
+                }));
 
-            var result = new LeaderboardReply();
-
-            result.Data.AddRange(leaderboards);
-
-            responseStream.WriteAsync(result);
-
-        });
+                responseStream.WriteAsync(result);
+            });
 
         
         var waitUserCancellation = await Task.Factory.StartNew(async () =>

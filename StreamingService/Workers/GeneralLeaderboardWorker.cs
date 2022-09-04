@@ -1,4 +1,5 @@
-﻿using StreamingService.Observables;
+﻿using StreamingService.Dto;
+using StreamingService.Observables;
 
 namespace StreamingService.Workers
 {
@@ -19,6 +20,16 @@ namespace StreamingService.Workers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                var next = new LeaderboardDto
+                {
+                    LeaderBoardId = 1,
+                    Data = new List<PersonPointsDto>().AsReadOnly()
+                };
+
+                _logger.LogDebug($"Publishing for leaderboard `{next.LeaderBoardId}`");
+
+                _leaderboardObservable.PublishNext(next);
+
                 await Task.Delay(5000);
             }
 

@@ -1,42 +1,33 @@
-﻿
-using System.Collections.Concurrent;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Disposables;
+using StreamingService.Dto;
 
 namespace StreamingService.Observables;
 
-public class LeaderboardObservable: ObservableBase<IReadOnlyCollection<PersonPoints>>
+public class LeaderboardObservable : ObservableBase<LeaderboardDto>
 {
     private readonly ILogger<LeaderboardObservable> _logger;
 
-    private ConcurrentDictionary<Guid, IObserver<IReadOnlyCollection<PersonPoints>>> _observers;
+    private event Action<LeaderboardDto>? ObserversOnNextEvents;
 
     public LeaderboardObservable(ILogger<LeaderboardObservable> logger)
     {
         _logger = logger;
-        _observers = new ConcurrentDictionary<Guid, IObserver<IReadOnlyCollection<PersonPoints>>>();
     }
 
-    protected override IDisposable SubscribeCore(IObserver<IReadOnlyCollection<PersonPoints>> observer)
-    {
-        var guid = Guid.NewGuid();
+    public void PublishNext(LeaderboardDto leaderboardDto) => ObserversOnNextEvents?.Invoke(leaderboardDto);
 
-        _observers.TryAdd(guid, observer);
+    protected override IDisposable SubscribeCore(IObserver<LeaderboardDto> observer)
+    {
+        _logger.LogDebug("New observer being subscribed");
+        ObserversOnNextEvents += observer.OnNext;
 
         return Disposable.Create(() =>
         {
-            _logger.LogDebug($"Observer {guid} is unsubscribing");
-            
-            bool removed = _observers.TryRemove(guid, out _); // exponential retry possibility
-            
-            _logger.LogDebug("Observer {guid} removed from observable", guid);
+            _logger.LogDebug("Observer is unsubscribing");
+            ObserversOnNextEvents -= observer.OnNext;
         });
     }
-
-    //public void PublishNew(IReadOnlyCollection<PersonPoints> personPoints)
-    //{
-
-    //}
 }
 
 
