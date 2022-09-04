@@ -30,6 +30,14 @@ grpcurl -plaintext -d '{\"leaderboard\":1}' -proto leaderboard.proto localhost:5
 
 
 # TODOs
+
+Server
 - [x] Create a Background worker to ingest data to change leaderboards
 - [x] Create Reactivex shared object and expose methods to Publishe / Subscribe for observable objects
+- [ ] Generate random values for the stream on Hosted Services
 - [ ] Service Discovery available in this app - so it is not needed anymore to provide the proto file format
+
+Client - Console app
+- [ ] Connect to the gRPC endpoint
+- [ ] Create the leaderboard table and show to the user
+- [ ] Update the leaderboard table when new value comes
